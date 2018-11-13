@@ -1,4 +1,4 @@
-# aws-jib-test
+# dynamodb-test
 Simple test out to do crud with dynamodb through aws sdk.
 ## Image Path
 Set image path as
@@ -6,4 +6,4 @@ Set image path as
 ## Authenticaition
 Get ecr username and password by
 <pre><code>aws ecr get-login</pre></code>
-"# dynamodb-test" 
+
