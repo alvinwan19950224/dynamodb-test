@@ -2,8 +2,10 @@ package com.alvin.test.controller;
 
 import com.alvin.test.dynamodb.DynamoDBUtil;
 import com.alvin.test.entity.Person;
-import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.*;
+import com.amazonaws.services.dynamodbv2.document.spec.DeleteItemSpec;
+import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
+import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,7 +23,7 @@ public class DynamoDBController {
             System.err.println("GetItem failed.");
             System.err.println(e.getMessage());
         }
-        return "";
+        return "Fail to get " + id;
     }
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
@@ -37,5 +39,41 @@ public class DynamoDBController {
             System.err.println(e.getMessage());
         }
         return "Fail to create";
+    }
+
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    public String updatePerson(final Person person) {
+        final Table table = DynamoDBUtil.dynamoDB.getTable(DynamoDBUtil.TABLE_NAME);
+        try {
+            UpdateItemSpec updateItemSpec = new UpdateItemSpec()
+                    .withPrimaryKey("Id", person.getId())
+                    .withUpdateExpression("set Gender = :genderNew, Name = :nameNew")
+                    .withValueMap(new ValueMap()
+                            .withString(":genderNew", person.getGender())
+                            .withString(":nameNew", person.getName())
+                    );
+            UpdateItemOutcome outcome = table.updateItem(updateItemSpec);
+            // Check the response.
+            return outcome.getItem().toJSONPretty();
+        } catch (Exception e) {
+            System.err.println("Error updating item");
+            System.err.println(e.getMessage());
+        }
+        return "Fail to update";
+    }
+
+    @RequestMapping(value = "/delete", method = RequestMethod.POST)
+    public void deleteItem(@RequestParam("id") final String id) {
+        final Table table = DynamoDBUtil.dynamoDB.getTable(DynamoDBUtil.TABLE_NAME);
+        try {
+            DeleteItemSpec deleteItemSpec = new DeleteItemSpec().withPrimaryKey("Id", id);
+            DeleteItemOutcome outcome = table.deleteItem(deleteItemSpec);
+            // Check the response.
+            System.out.println("Printing item that was deleted...");
+            System.out.println(outcome.getItem().toJSONPretty());
+        } catch (Exception e) {
+            System.err.println("Error deleting item ");
+            System.err.println(e.getMessage());
+        }
     }
 }
