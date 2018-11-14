@@ -13,6 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class DynamoDBController {
+    @RequestMapping(value = "/health", method = RequestMethod.GET)
+    public String healthCheck() {
+        return "OK";
+    }
+
     @RequestMapping(value = "/get", method = RequestMethod.GET)
     public String getPerson(@RequestParam("id") final String id) {
         Table table = DynamoDBUtil.dynamoDB.getTable(DynamoDBUtil.TABLE_NAME);
